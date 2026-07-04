@@ -95,6 +95,22 @@ def graph(out: Path = typer.Option(None, help="Output HTML path (defaults to con
     typer.echo(f"Wrote {len(nodelink.nodes)} nodes, {len(nodelink.links)} links to {out}")
 
 
+@app.command("add-note")
+def add_note_cmd(
+    text: str = typer.Argument(..., help="The note text to remember (quote it)."),
+    label: str = typer.Option("note", "--label", "-l", help="A short name shown in search results."),
+) -> None:
+    """Add a single note straight into Second Brain - no file needed."""
+    from datetime import datetime, timezone
+
+    from personal_llm.memory.ingest import ingest_text
+
+    engine = _engine()
+    doc_id = f"{label}-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}"
+    result = ingest_text(engine.store, engine.vectors, engine.router, text=text, doc_id=doc_id, source=label)
+    typer.echo(f"Added '{label}' ({result.chunks_ingested} chunk(s), {result.kg_triples} graph triple(s)).")
+
+
 @app.command("code-graph")
 def code_graph_cmd(
     target: str = typer.Argument(".", help="Directory or URL for Graphify to analyze."),

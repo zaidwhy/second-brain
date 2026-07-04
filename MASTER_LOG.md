@@ -39,3 +39,10 @@ Append-only. Newest entries at the bottom. Read just the tail for recent context
   from the target's graphify-out). Added a real-schema test. 23 tests total.
 - Also verified end-to-end against the live core: ingest-vault + search + related all work with local
   embeddings; graph export needs a triple-capable LLM (empty otherwise, which the new empty state covers).
+
+## 2026-07-04 - add-note command
+
+- Added an `add-note "text" [--label NAME]` CLI command that ingests a single note directly via
+  personal_llm.memory.ingest.ingest_text - no file needed. Verified: adds the note and it comes back
+  as the top `search` hit. Note: the strongest local Ollama model present for graph triple extraction
+  is qwen2.5:3b-instruct (set OLLAMA_MODEL to it; the router default llama3.2:3b tag is not installed).

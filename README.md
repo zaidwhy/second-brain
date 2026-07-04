@@ -7,6 +7,8 @@ vault-level workflows the core does not:
 
 - **Vault ingestion** - point it at a folder of notes and it ingests every changed file,
   skipping unchanged ones via a content-hash manifest (`ingest-vault`).
+- **Quick note** - drop a single note straight in from the command line, no file needed
+  (`add-note "..."`).
 - **Auto-linking** - given a note, surface the most related *other* notes, aggregated at
   the document level rather than as raw chunks (`related`).
 - **Knowledge-graph view** - export the graph to a single self-contained, offline HTML
@@ -43,6 +45,9 @@ py -3.12 -m venv venv
 ```powershell
 # Ingest the bundled sample vault (or pass your own folder)
 & "venv\Scripts\python" -m second_brain.interfaces.cli ingest-vault sample-vault
+
+# Or drop in a single note without a file:
+& "venv\Scripts\python" -m second_brain.interfaces.cli add-note "Remember: qwen2.5:3b-instruct is the best local model for the graph" --label idea
 
 # Search, find related notes, and export the graph
 & "venv\Scripts\python" -m second_brain.interfaces.cli search "how does retrieval work"
