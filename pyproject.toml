@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "second-brain"
+version = "0.1.0"
+description = "An AI knowledge layer (vault ingest, auto-linking, graph view) built on the Personal LLM core."
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{ name = "Zaid Ali Syed" }]
+license = { text = "Proprietary - no license granted for reuse yet" }
+# personal-llm is a local sibling package, installed editable from ../personal-llm
+# (see README). It is intentionally not a PyPI dependency here.
+dependencies = [
+  "pydantic>=2.6",
+  "pydantic-settings>=2.2",
+  "typer>=0.12",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+second-brain = "second_brain.interfaces.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

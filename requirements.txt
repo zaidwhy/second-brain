@@ -1,0 +1,6 @@
+# Second Brain++ own dependencies. The Personal LLM core is installed separately as an
+# editable sibling package: pip install -e ../personal-llm
+pydantic>=2.6
+pydantic-settings>=2.2
+typer>=0.12
+pytest>=8.0
