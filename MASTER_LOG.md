@@ -23,3 +23,19 @@ Append-only. Newest entries at the bottom. Read just the tail for recent context
   `graphify_adapter` (run the `graphify` CLI, parse its graph.json defensively, merge graphs)
   and a `code-graph` CLI command that renders a code graph in our offline viewer, optionally
   merged with the notes graph. Graphify is never vendored or required. 22 tests total.
+
+## 2026-07-04 - Graph viewer redesign + Graphify live validation
+
+- Redesigned the graph HTML viewer (frontend-design pass): ink/vignette ground, serif title,
+  mono HUD, node color-by-type with a legend, degree-sized hubs, a hover "trace connections"
+  mode with a relationship readout, an inviting empty state, and prefers-reduced-motion support.
+  Fixed a temporal-dead-zone bug (dragging referenced before its let) that had blanked the canvas,
+  and made labels hide on large graphs until hover to avoid clutter. Verified visually via browser
+  screenshots (notes graph, empty state, and a 71-node code graph).
+- Validated the Graphify integration against a real run: installed graphifyy in an isolated venv,
+  ran `graphify update --no-cluster` (no LLM needed) on this repo's source, confirmed the real
+  schema (nodes: id/label/file_type; links: source/target/relation/confidence), and corrected the
+  adapter (map file_type -> node type; run_graphify uses `update --no-cluster` and reads graph.json
+  from the target's graphify-out). Added a real-schema test. 23 tests total.
+- Also verified end-to-end against the live core: ingest-vault + search + related all work with local
+  embeddings; graph export needs a triple-capable LLM (empty otherwise, which the new empty state covers).

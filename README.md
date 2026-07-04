@@ -54,11 +54,20 @@ Ingest and search reuse Personal LLM's local embeddings, so they work with no AP
 ## Graphify integration (optional)
 
 `code-graph` shells out to the [Graphify](https://github.com/Graphify-Labs) CLI (MIT) to
-turn a codebase or docs into a knowledge graph, then renders Graphify's `graph.json` with
-our own offline viewer - and can merge it with the notes graph via `--merge-notes`.
-Graphify is never vendored or required; install it separately with `pip install graphifyy`
-(the CLI stays `graphify`). The adapter in `src/second_brain/graphify_adapter.py` parses
-Graphify's JSON defensively so it survives key-name changes across Graphify versions.
+turn a codebase into a knowledge graph, then renders Graphify's `graph.json` with our own
+offline viewer - and can merge it with the notes graph via `--merge-notes`.
+
+- By default it runs Graphify's tree-sitter extraction (`graphify update --no-cluster`),
+  which needs **no LLM or API key**. Pass `--full` for Graphify's LLM community clustering
+  (that path needs a provider key).
+- Graphify writes its own `graphify-out/` cache into the directory it analyzes; that folder
+  is gitignored here.
+- Graphify is never vendored or required; install it separately with `pip install graphifyy`
+  (the CLI stays `graphify`).
+
+The adapter in `src/second_brain/graphify_adapter.py` parses Graphify's JSON defensively
+(node `id`/`label`/`file_type`, links under `links` with `source`/`target`/`relation`) and
+is verified against a real Graphify run, so it tolerates key-name changes across versions.
 
 ## Tests
 

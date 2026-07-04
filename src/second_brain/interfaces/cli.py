@@ -99,7 +99,9 @@ def graph(out: Path = typer.Option(None, help="Output HTML path (defaults to con
 def code_graph_cmd(
     target: str = typer.Argument(".", help="Directory or URL for Graphify to analyze."),
     out: Path = typer.Option(Path("data/code-graph.html"), help="Output HTML path."),
-    mode: str = typer.Option(None, help="Graphify mode, e.g. 'deep'."),
+    full: bool = typer.Option(
+        False, "--full", help="Run Graphify's full LLM clustering (needs a provider API key)."
+    ),
     merge_notes: bool = typer.Option(
         False, "--merge-notes", help="Also merge in the notes knowledge graph from the core."
     ),
@@ -107,7 +109,7 @@ def code_graph_cmd(
     """Build a code/repo knowledge graph with Graphify and render it in our offline viewer.
 
     Requires Graphify: `pip install graphifyy`. Graphify is optional - the rest of Second
-    Brain works without it.
+    Brain works without it. By default this uses Graphify's no-LLM extraction.
     """
     from second_brain.graphify_adapter import (
         GraphifyNotInstalled,
@@ -118,7 +120,7 @@ def code_graph_cmd(
     from second_brain.graphview import render_html, to_nodelink
 
     try:
-        json_path = run_graphify(target, out.parent, mode=mode)
+        json_path = run_graphify(target, no_cluster=not full)
     except GraphifyNotInstalled as exc:
         typer.echo(str(exc))
         raise typer.Exit(1)

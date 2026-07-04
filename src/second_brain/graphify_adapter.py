@@ -25,7 +25,7 @@ from second_brain.graphview import NodeLink
 # Graphify's JSON may use any of these keys; we accept the common aliases defensively.
 _ID_KEYS = ("id", "key", "name")
 _NAME_KEYS = ("label", "name", "title", "id")
-_TYPE_KEYS = ("type", "kind", "group", "category", "label")
+_TYPE_KEYS = ("type", "file_type", "kind", "group", "category", "label")
 _EDGE_LIST_KEYS = ("edges", "links", "relationships", "relations")
 _SRC_KEYS = ("source", "src", "from", "start", "subject")
 _DST_KEYS = ("target", "dst", "to", "end", "object")
@@ -94,23 +94,33 @@ def load_graphify_graph(json_path: Path) -> NodeLink:
     return parse_graphify_json(data)
 
 
-def run_graphify(target: str, out_dir: Path, mode: str | None = None, timeout: int = 1800) -> Path:
-    """Run the `graphify` CLI over `target`, writing into `out_dir/graphify-out/`.
+def run_graphify(target: str, *, no_cluster: bool = True, timeout: int = 1800) -> Path:
+    """Run the `graphify` CLI over a directory `target` and return its graph.json path.
 
-    Returns the path to the produced graph.json. Raises GraphifyNotInstalled if the CLI is
-    missing, or CalledProcessError if Graphify itself fails.
+    Uses `graphify update <target>`, which writes `graphify-out/graph.json` inside the
+    target directory (Graphify's own cache). With `no_cluster=True` (default) it runs the
+    tree-sitter extraction only, needing no LLM or API key; set it False for Graphify's full
+    LLM clustering (which requires a provider key).
+
+    Raises GraphifyNotInstalled if the CLI is missing, or CalledProcessError if Graphify fails.
     """
     if not graphify_available():
         raise GraphifyNotInstalled(
             "The `graphify` CLI was not found. Install it with `pip install graphifyy`."
         )
-    out_dir = Path(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    cmd = ["graphify", str(target)]
-    if mode:
-        cmd += ["--mode", mode]
-    subprocess.run(cmd, cwd=str(out_dir), check=True, timeout=timeout)
-    return out_dir / "graphify-out" / "graph.json"
+    cmd = ["graphify", "update", str(target)]
+    if no_cluster:
+        cmd.append("--no-cluster")
+    subprocess.run(cmd, check=True, timeout=timeout)
+
+    candidates = [
+        Path(target) / "graphify-out" / "graph.json",
+        Path.cwd() / "graphify-out" / "graph.json",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
 
 
 def merge(*graphs: NodeLink) -> NodeLink:

@@ -64,8 +64,29 @@ def test_merge_dedupes_nodes_and_edges():
     assert len(merged.links) == 2
 
 
-def test_run_graphify_raises_when_not_installed(monkeypatch, tmp_path):
+def test_parse_real_graphify_schema():
+    # Shape captured from a real `graphify update --no-cluster` run: nodes use id/label/
+    # file_type; links use source/target/relation/confidence under the "links" key.
+    data = {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "nodes": [
+            {"id": "init", "label": "__init__.py", "file_type": "code", "source_file": "__init__.py"},
+            {"id": "vault", "label": "vault.py", "file_type": "code"},
+        ],
+        "links": [
+            {"source": "init", "target": "vault", "relation": "imports", "confidence": "EXTRACTED", "weight": 1.0},
+        ],
+    }
+    nl = ga.parse_graphify_json(data)
+    assert {n["id"] for n in nl.nodes} == {"init", "vault"}
+    assert nl.nodes[0]["name"] == "__init__.py"
+    assert nl.nodes[0]["type"] == "code"  # file_type, not the filename label
+    assert nl.links[0] == {"source": "init", "target": "vault", "rel": "imports"}
+
+
+def test_run_graphify_raises_when_not_installed(monkeypatch):
     monkeypatch.setattr(ga.shutil, "which", lambda _name: None)
     assert ga.graphify_available() is False
     with pytest.raises(ga.GraphifyNotInstalled):
-        ga.run_graphify(".", tmp_path)
+        ga.run_graphify(".")
