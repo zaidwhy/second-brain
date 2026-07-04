@@ -17,6 +17,11 @@ app = typer.Typer(help="Second Brain++ - an AI knowledge layer over your Persona
 
 
 def _engine():
+    # Default the graph's extraction model to a capable local one, unless the user set their
+    # own OLLAMA_MODEL. Personal LLM's router reads OLLAMA_MODEL, so set it before building.
+    import os
+
+    os.environ.setdefault("OLLAMA_MODEL", get_settings().ollama_model)
     from personal_llm.engine import build_engine
 
     return build_engine()

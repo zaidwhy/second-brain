@@ -60,6 +60,11 @@ py -3.12 -m venv venv
 
 Ingest and search reuse Personal LLM's local embeddings, so they work with no API key.
 
+The knowledge graph needs a chat model to extract relationships. Second Brain defaults to the
+local `qwen2.5:3b-instruct` Ollama model, so `graph` populates out of the box once you have
+it: `ollama pull qwen2.5:3b-instruct`. Override with `OLLAMA_MODEL` (or
+`SECOND_BRAIN_OLLAMA_MODEL`) to use a different local model, or add a Gemini key to use Gemini.
+
 ## Graphify integration (optional)
 
 `code-graph` shells out to the [Graphify](https://github.com/Graphify-Labs) CLI (MIT) to

@@ -46,3 +46,11 @@ Append-only. Newest entries at the bottom. Read just the tail for recent context
   personal_llm.memory.ingest.ingest_text - no file needed. Verified: adds the note and it comes back
   as the top `search` hit. Note: the strongest local Ollama model present for graph triple extraction
   is qwen2.5:3b-instruct (set OLLAMA_MODEL to it; the router default llama3.2:3b tag is not installed).
+
+## 2026-07-04 - Default the graph model to qwen2.5:3b-instruct
+
+- Second Brain now defaults the graph's extraction model to qwen2.5:3b-instruct: added
+  `ollama_model` to SecondBrainSettings and `_engine()` sets OLLAMA_MODEL via os.environ.setdefault
+  (respects a user-set OLLAMA_MODEL / SECOND_BRAIN_OLLAMA_MODEL). No env var needed anymore.
+- Verified with no env var set: add-note on relational text extracted 3 triples and graph rendered
+  6 nodes / 3 links (civos-council had returned empty; qwen2.5:3b-instruct works).
