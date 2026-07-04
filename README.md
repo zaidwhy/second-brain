@@ -19,6 +19,10 @@ vault-level workflows the core does not:
 This is project #2 in the [AI ecosystem roadmap](../ROADMAP.md). It reuses the Personal
 LLM package instead of reimplementing retrieval or routing.
 
+> **One-click run:** the ecosystem launcher one level up (`..\run.cmd`) tests and demos this
+> project alongside Personal LLM in a single command, and opens the knowledge graph for you.
+> Double-click it for a menu, or run `..\run.cmd demo`.
+
 ## Setup
 
 ```powershell
