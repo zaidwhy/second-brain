@@ -12,6 +12,9 @@ vault-level workflows the core does not:
 - **Knowledge-graph view** - export the graph to a single self-contained, offline HTML
   visualization with an inline force layout, no CDN (`graph`).
 - **Semantic search** over everything ingested (`search`).
+- **Code graphs via Graphify** (optional) - build a code/repo knowledge graph with
+  [Graphify](https://github.com/Graphify-Labs) and render it in the same offline viewer,
+  optionally merged with your notes graph (`code-graph`).
 
 This is project #2 in the [AI ecosystem roadmap](../ROADMAP.md). It reuses the Personal
 LLM package instead of reimplementing retrieval or routing.
@@ -24,7 +27,9 @@ py -3.12 -m venv venv
 & "venv\Scripts\python" -m pip install -r requirements.txt
 
 # Install the Personal LLM core (the sibling package this project builds on).
-# This pulls the heavier embedding/vector deps and is required to actually run the CLI.
+# Its runtime deps (chromadb, sentence-transformers, etc.) live in its requirements.txt,
+# not its pyproject, so install both: the deps, then the editable package.
+& "venv\Scripts\python" -m pip install -r ..\personal-llm\requirements.txt
 & "venv\Scripts\python" -m pip install -e ..\personal-llm
 & "venv\Scripts\python" -m pip install -e .
 ```
@@ -39,9 +44,21 @@ py -3.12 -m venv venv
 & "venv\Scripts\python" -m second_brain.interfaces.cli search "how does retrieval work"
 & "venv\Scripts\python" -m second_brain.interfaces.cli related sample-vault\recall.md
 & "venv\Scripts\python" -m second_brain.interfaces.cli graph --out data\graph.html
+
+# Optional: a code graph of any repo via Graphify (pip install graphifyy first)
+& "venv\Scripts\python" -m second_brain.interfaces.cli code-graph . --merge-notes
 ```
 
 Ingest and search reuse Personal LLM's local embeddings, so they work with no API key.
+
+## Graphify integration (optional)
+
+`code-graph` shells out to the [Graphify](https://github.com/Graphify-Labs) CLI (MIT) to
+turn a codebase or docs into a knowledge graph, then renders Graphify's `graph.json` with
+our own offline viewer - and can merge it with the notes graph via `--merge-notes`.
+Graphify is never vendored or required; install it separately with `pip install graphifyy`
+(the CLI stays `graphify`). The adapter in `src/second_brain/graphify_adapter.py` parses
+Graphify's JSON defensively so it survives key-name changes across Graphify versions.
 
 ## Tests
 

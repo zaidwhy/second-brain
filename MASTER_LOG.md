@@ -13,3 +13,13 @@ Append-only. Newest entries at the bottom. Read just the tail for recent context
 - Core logic has no Personal LLM import (dependencies injected), so the test suite runs
   fully mocked. 15 tests across vault/links/graphview.
 - Sample vault with 3 notes bundled for a zero-config first run.
+
+## 2026-07-04 - Published + Graphify integration
+
+- Created public GitHub repo `syzayd/second-brain` and pushed v0.1.
+- Fixed the install docs: the core's runtime deps live in personal-llm/requirements.txt
+  (its pyproject declares none), so downstream installs must `pip install -r` those too.
+- Added an optional Graphify integration (https://github.com/Graphify-Labs, MIT):
+  `graphify_adapter` (run the `graphify` CLI, parse its graph.json defensively, merge graphs)
+  and a `code-graph` CLI command that renders a code graph in our offline viewer, optionally
+  merged with the notes graph. Graphify is never vendored or required. 22 tests total.

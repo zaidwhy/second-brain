@@ -95,5 +95,44 @@ def graph(out: Path = typer.Option(None, help="Output HTML path (defaults to con
     typer.echo(f"Wrote {len(nodelink.nodes)} nodes, {len(nodelink.links)} links to {out}")
 
 
+@app.command("code-graph")
+def code_graph_cmd(
+    target: str = typer.Argument(".", help="Directory or URL for Graphify to analyze."),
+    out: Path = typer.Option(Path("data/code-graph.html"), help="Output HTML path."),
+    mode: str = typer.Option(None, help="Graphify mode, e.g. 'deep'."),
+    merge_notes: bool = typer.Option(
+        False, "--merge-notes", help="Also merge in the notes knowledge graph from the core."
+    ),
+) -> None:
+    """Build a code/repo knowledge graph with Graphify and render it in our offline viewer.
+
+    Requires Graphify: `pip install graphifyy`. Graphify is optional - the rest of Second
+    Brain works without it.
+    """
+    from second_brain.graphify_adapter import (
+        GraphifyNotInstalled,
+        load_graphify_graph,
+        merge,
+        run_graphify,
+    )
+    from second_brain.graphview import render_html, to_nodelink
+
+    try:
+        json_path = run_graphify(target, out.parent, mode=mode)
+    except GraphifyNotInstalled as exc:
+        typer.echo(str(exc))
+        raise typer.Exit(1)
+
+    graph = load_graphify_graph(json_path)
+    if merge_notes:
+        engine = _engine()
+        notes_graph = to_nodelink(engine.store.all_nodes(), engine.store.all_edges())
+        graph = merge(graph, notes_graph)
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(render_html(graph, title="Second Brain - Code Graph"), encoding="utf-8")
+    typer.echo(f"Wrote {len(graph.nodes)} nodes, {len(graph.links)} links to {out}")
+
+
 if __name__ == "__main__":
     app()

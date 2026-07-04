@@ -15,7 +15,9 @@ cd C:\Users\Asus\projects\ai-ecosystem\second-brain
 - Venv folder is `venv`, **Python 3.12** (matches personal-llm; torch/chromadb wheels lag on 3.14).
   `py -3.12 -m venv venv`
 - Install: `& "venv\Scripts\python" -m pip install -r requirements.txt`, then the sibling
-  core `& "venv\Scripts\python" -m pip install -e ..\personal-llm`, then `-e .`.
+  core's runtime deps `& "venv\Scripts\python" -m pip install -r ..\personal-llm\requirements.txt`,
+  then the core itself `-e ..\personal-llm`, then `-e .`. The core's pyproject declares no
+  runtime deps (they are in its requirements.txt), so the editable install alone is not enough.
 
 ## Tests
 
