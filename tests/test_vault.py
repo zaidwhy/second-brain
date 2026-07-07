@@ -87,3 +87,30 @@ def test_ingest_vault_force_ignores_manifest(tmp_path):
 
     report = ingest_vault(vault, manifest, ingest_fn, force=True)
     assert report.ingested and calls == ["a.md"]
+
+
+def test_ingest_failure_still_saves_progress(tmp_path):
+    """Files ingested before a mid-run crash must not be re-ingested next run."""
+    _write(tmp_path / "vault" / "a.md", "one")
+    _write(tmp_path / "vault" / "b.md", "two")
+    manifest = tmp_path / "manifest.json"
+
+    calls: list[str] = []
+
+    def flaky(path: Path):
+        calls.append(path.name)
+        if path.name == "b.md":
+            raise RuntimeError("embedder died")
+
+    try:
+        ingest_vault(tmp_path / "vault", manifest, flaky)
+    except RuntimeError:
+        pass
+    assert calls == ["a.md", "b.md"]
+
+    calls.clear()
+    try:
+        ingest_vault(tmp_path / "vault", manifest, flaky)
+    except RuntimeError:
+        pass
+    assert calls == ["b.md"]  # a.md was remembered despite the crash

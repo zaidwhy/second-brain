@@ -120,7 +120,10 @@ def run_graphify(target: str, *, no_cluster: bool = True, timeout: int = 1800) -
     for candidate in candidates:
         if candidate.exists():
             return candidate
-    return candidates[0]
+    raise FileNotFoundError(
+        "Graphify reported success but wrote no graph.json; looked in: "
+        + ", ".join(str(c) for c in candidates)
+    )
 
 
 def merge(*graphs: NodeLink) -> NodeLink:

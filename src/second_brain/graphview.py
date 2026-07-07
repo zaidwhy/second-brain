@@ -54,7 +54,9 @@ def to_nodelink(nodes: Iterable[_Node], edges: Iterable[_Edge]) -> NodeLink:
 
 def render_html(nodelink: NodeLink, title: str = "Second Brain - Knowledge Graph") -> str:
     """A single self-contained HTML page rendering `nodelink` as a force-directed graph."""
-    data = nodelink.to_json(indent=None)
+    # "</" must not appear literally inside the inline <script>: a node named
+    # "</script>..." would otherwise terminate the script tag. "<\/" is identical JSON.
+    data = nodelink.to_json(indent=None).replace("</", "<\\/")
     return _HTML_TEMPLATE.replace("__TITLE__", title).replace("__DATA__", data)
 
 
@@ -303,7 +305,7 @@ function runGraph() {
     if (!n) { readout.classList.remove("on"); return; }
     const rels = links.filter(l => l.s.id === n.id || l.t.id === n.id).map(l => {
       const out = l.s.id === n.id;
-      return { verb: (out ? "" : "") + (l.rel || "linked"), other: (out ? l.t : l.s).name, out };
+      return { verb: l.rel || "linked", other: (out ? l.t : l.s).name, out };
     });
     readout.innerHTML =
       '<div class="name">' + esc(n.name) + '</div><div class="kind">' + esc(n.type) + '</div>' +

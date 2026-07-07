@@ -53,3 +53,13 @@ def test_render_html_is_self_contained_and_embeds_data():
 def test_render_html_has_no_em_dash():
     html = render_html(to_nodelink([], []))
     assert chr(0x2014) not in html
+
+
+def test_render_html_script_safe_names():
+    """A node named like a closing script tag must not break out of the inline script."""
+    from second_brain.graphview import NodeLink, render_html
+
+    nl = NodeLink(nodes=[{"id": "x", "name": "</script><b>boom</b>", "type": "note"}], links=[])
+    html = render_html(nl)
+    assert "</script><b>boom</b>" not in html
+    assert "<\/script>" in html

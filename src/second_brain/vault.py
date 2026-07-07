@@ -79,14 +79,18 @@ def ingest_vault(
     """
     manifest = VaultManifest.load(manifest_path)
     report = VaultIngestReport()
-    for path in iter_vault_files(vault_dir):
-        key = str(path.resolve())
-        fingerprint = file_fingerprint(path)
-        if not force and manifest.fingerprints.get(key) == fingerprint:
-            report.skipped.append(key)
-            continue
-        ingest_fn(path)
-        manifest.fingerprints[key] = fingerprint
-        report.ingested.append(key)
-    manifest.save(manifest_path)
+    # Save inside finally: if ingest_fn raises mid-vault, files already ingested this run
+    # must not be re-embedded on the next run.
+    try:
+        for path in iter_vault_files(vault_dir):
+            key = str(path.resolve())
+            fingerprint = file_fingerprint(path)
+            if not force and manifest.fingerprints.get(key) == fingerprint:
+                report.skipped.append(key)
+                continue
+            ingest_fn(path)
+            manifest.fingerprints[key] = fingerprint
+            report.ingested.append(key)
+    finally:
+        manifest.save(manifest_path)
     return report
