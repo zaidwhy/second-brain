@@ -1,6 +1,12 @@
 # Second Brain++
 
-**Your Mind. Expanded.** An AI knowledge layer built on top of the [Personal LLM](../personal-llm) core.
+[![CI](https://github.com/syzayd/second-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/syzayd/second-brain/actions/workflows/ci.yml)
+![Tests](https://img.shields.io/badge/tests-40%20passed%20offline-brightgreen)
+![Python](https://img.shields.io/badge/python-3.12-blue)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+**Your Mind. Expanded.** An AI knowledge layer built on top of the
+[Personal LLM](https://github.com/syzayd/personal-llm) core.
 
 Personal LLM already gives us memory, RAG, and a knowledge graph. Second Brain++ adds the
 vault-level workflows the core does not:
@@ -18,17 +24,17 @@ vault-level workflows the core does not:
   [Graphify](https://github.com/Graphify-Labs) and render it in the same offline viewer,
   optionally merged with your notes graph (`code-graph`).
 
-This is project #2 in the [AI ecosystem roadmap](../ROADMAP.md). It reuses the Personal
-LLM package instead of reimplementing retrieval or routing.
+This is project #2 in a larger local-first AI ecosystem. It reuses the Personal LLM
+package instead of reimplementing retrieval or routing.
 
-> **One-click run:** the ecosystem launcher one level up (`..\run.cmd`) tests and demos this
-> project alongside Personal LLM in a single command, and opens the knowledge graph for you.
-> Double-click it for a menu, or run `..\run.cmd demo`.
+## Setup (under 5 minutes)
 
-## Setup
+Clone this repo and the core side by side, then install both:
 
 ```powershell
-cd C:\Users\Asus\projects\ai-ecosystem\second-brain
+git clone https://github.com/syzayd/personal-llm
+git clone https://github.com/syzayd/second-brain
+cd second-brain
 py -3.12 -m venv venv
 & "venv\Scripts\python" -m pip install -r requirements.txt
 
@@ -83,15 +89,23 @@ The adapter in `src/second_brain/graphify_adapter.py` parses Graphify's JSON def
 (node `id`/`label`/`file_type`, links under `links` with `source`/`target`/`relation`) and
 is verified against a real Graphify run, so it tolerates key-name changes across versions.
 
+## Demo
+
+<!-- TODO(zaid): record a real 30-second GIF - ingest the sample vault, run `related`,
+open the exported graph.html and hover a node. Never fabricate. -->
+Demo GIF coming soon. Until then: `graph --out data\graph.html` exports a fully offline,
+single-file force-graph visualization of everything you ingested.
+
 ## Tests
 
 ```powershell
 & "venv\Scripts\python" -m pytest tests/ -q
 ```
 
-The core logic (vault, links, graphview) has no Personal LLM import - dependencies are
-injected - so the whole suite runs fully mocked, with no API key, network, or heavy
-model. Only the CLI touches the real core, and it imports it lazily.
+40 tests. The core logic (vault, links, graphview, near-dup detection) has no Personal
+LLM import - dependencies are injected - so the whole suite runs fully mocked, with no
+API key, network, or heavy model (CI runs it keyless on every push). Only the CLI
+touches the real core, and it imports it lazily.
 
 ## Architecture
 
@@ -103,5 +117,13 @@ CLI (thin, lazy-imports the core)
    Personal LLM core: ingest_file | semantic_search | knowledge graph (store.all_nodes/all_edges)
 ```
 
-Design docs for the full vision live in [`plan.md`](plan.md); the north-star prompt is
-`C:\Users\Asus\Documents\fable 5\second brain.txt`.
+Design docs for the full vision live in [`plan.md`](plan.md).
+
+## Contributing
+
+Small, focused PRs welcome - the one hard rule is that tests stay offline and keyless
+(inject fakes; no `personal_llm` imports at module top level outside the CLI).
+
+## License
+
+[MIT](LICENSE).

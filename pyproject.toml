@@ -9,7 +9,7 @@ description = "An AI knowledge layer (vault ingest, auto-linking, graph view) bu
 readme = "README.md"
 requires-python = ">=3.12"
 authors = [{ name = "Zaid Ali Syed" }]
-license = { text = "Proprietary - no license granted for reuse yet" }
+license = { text = "MIT" }
 # personal-llm is a local sibling package, installed editable from ../personal-llm
 # (see README). It is intentionally not a PyPI dependency here.
 dependencies = [
@@ -29,3 +29,4 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
