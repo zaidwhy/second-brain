@@ -91,10 +91,14 @@ is verified against a real Graphify run, so it tolerates key-name changes across
 
 ## Demo
 
-<!-- TODO(zaid): record a real 30-second GIF - ingest the sample vault, run `related`,
-open the exported graph.html and hover a node. Never fabricate. -->
-Demo GIF coming soon. Until then: `graph --out data\graph.html` exports a fully offline,
-single-file force-graph visualization of everything you ingested.
+![Knowledge graph demo - a real `graph` export being explored](docs/demo-graph.gif)
+
+A real recorded session: `second-brain graph --out data\graph.html` exports a fully
+offline, single-file force-graph of everything you ingested; the GIF above is that file
+being explored (hover, drag, zoom) - captured from a real run, as is everything here.
+
+<!-- TODO(zaid): also capture the CLI half (ingest the sample vault, run `related`) as a
+real terminal recording. Never fabricate. -->
 
 ## Tests
 
