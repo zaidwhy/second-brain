@@ -1,7 +1,7 @@
 # Second Brain++
 
 [![CI](https://github.com/syzayd/second-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/syzayd/second-brain/actions/workflows/ci.yml)
-![Tests](https://img.shields.io/badge/tests-40%20passed%20offline-brightgreen)
+![Tests](https://img.shields.io/badge/tests-50%20passed%20offline-brightgreen)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -106,10 +106,10 @@ real terminal recording. Never fabricate. -->
 & "venv\Scripts\python" -m pytest tests/ -q
 ```
 
-40 tests. The core logic (vault, links, graphview, near-dup detection) has no Personal
-LLM import - dependencies are injected - so the whole suite runs fully mocked, with no
-API key, network, or heavy model (CI runs it keyless on every push). Only the CLI
-touches the real core, and it imports it lazily.
+50 tests. The core logic (vault, links, graphview, near-dup and contradiction
+detection) has no Personal LLM import - dependencies are injected - so the whole suite
+runs fully mocked, with no API key, network, or heavy model (CI runs it keyless on
+every push). Only the CLI touches the real core, and it imports it lazily.
 
 ## Architecture
 
@@ -125,8 +125,10 @@ Design docs for the full vision live in [`plan.md`](plan.md).
 
 ## Contributing
 
-Small, focused PRs welcome - the one hard rule is that tests stay offline and keyless
-(inject fakes; no `personal_llm` imports at module top level outside the CLI).
+Small, focused PRs welcome - see [CONTRIBUTING.md](CONTRIBUTING.md) for the ground
+rules (the short version: tests stay offline and keyless, inject fakes, no
+`personal_llm` imports at module top level outside the CLI). Bug and feature issue
+templates are under `.github/ISSUE_TEMPLATE/`.
 
 ## License
 

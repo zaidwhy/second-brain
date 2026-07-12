@@ -54,3 +54,15 @@ Append-only. Newest entries at the bottom. Read just the tail for recent context
   (respects a user-set OLLAMA_MODEL / SECOND_BRAIN_OLLAMA_MODEL). No env var needed anymore.
 - Verified with no env var set: add-note on relational text extracted 3 triples and graph rendered
   6 nodes / 3 links (civos-council had returned empty; qwen2.5:3b-instruct works).
+
+## 2026-07-11 (Night Shift) - README/CONTRIBUTING/issue-template polish (Tier 3)
+
+- README already had CI badge, demo section, quickstart, and architecture sketch from
+  earlier passes; this pass closed the remaining high-star-standard gaps: extracted a
+  standalone `CONTRIBUTING.md` (was an inline README paragraph) covering the same
+  offline/keyless/lazy-import/no-CDN ground rules from CLAUDE.md, and added
+  `.github/ISSUE_TEMPLATE/bug_report.md` + `feature_request.md`.
+- Also caught a stale number: README's test-count badge and Tests section still said
+  "40 tests" after near-dup + contradiction detectors grew the suite to 50 - corrected
+  both.
+- Docs-only change; full suite still 50/50 green offline (verified, no regressions expected).
