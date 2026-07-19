@@ -100,6 +100,26 @@ def graph(out: Path = typer.Option(None, help="Output HTML path (defaults to con
     typer.echo(f"Wrote {len(nodelink.nodes)} nodes, {len(nodelink.links)} links to {out}")
 
 
+@app.command("predict-links")
+def predict_links_cmd(
+    k: int = typer.Option(10, help="Number of predicted links to show."),
+    min_score: int = typer.Option(1, help="Minimum shared-neighbor count to report."),
+) -> None:
+    """Suggest missing links: note pairs sharing neighbors but not yet connected."""
+    from second_brain.link_predict import predict_links
+
+    engine = _engine()
+    predictions = predict_links(
+        engine.store.all_nodes(), engine.store.all_edges(), k=k, min_score=min_score
+    )
+    if not predictions:
+        typer.echo("No link predictions - graph is too sparse or fully connected.")
+        return
+    for p in predictions:
+        shared = ", ".join(sorted(p.common_neighbors))
+        typer.echo(f"[{p.score}] {p.node_a} <-> {p.node_b} (shared: {shared})")
+
+
 @app.command("add-note")
 def add_note_cmd(
     text: str = typer.Argument(..., help="The note text to remember (quote it)."),
