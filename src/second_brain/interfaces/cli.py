@@ -120,6 +120,72 @@ def predict_links_cmd(
         typer.echo(f"[{p.score}] {p.node_a} <-> {p.node_b} (shared: {shared})")
 
 
+def _notes_from_store(engine):
+    """Aggregate ingested chunks into one embedding + full text per doc_id.
+
+    Personal LLM stores documents as chunks: MemoryStore.list_memories(kind="semantic")
+    has one record per chunk, each with meta["doc_id"] linking chunks from the same
+    source. VectorStore (src/personal_llm/memory/vectors.py) is intentionally a thin
+    Chroma wrapper (ADR 0001) and does not expose a "fetch a stored embedding back out by
+    id" method. Rather than reach into its private Chroma collection, this just re-embeds
+    each document's full text with the same router used at ingest time - the same
+    per-call embedding cost `related`/`search` already pay, and it keeps VectorStore's
+    encapsulation intact instead of adding a one-off accessor for a single caller.
+    """
+    from collections import defaultdict
+
+    from second_brain.near_dup import EmbeddedNote
+
+    chunks_by_doc: dict[str, list[str]] = defaultdict(list)
+    source_by_doc: dict[str, str] = {}
+    for memory in engine.store.list_memories(kind="semantic"):
+        doc_id = memory.meta.get("doc_id")
+        if not doc_id:
+            continue
+        chunks_by_doc[doc_id].append(memory.content)
+        source_by_doc.setdefault(doc_id, memory.source)
+
+    texts = {doc_id: "\n".join(pieces) for doc_id, pieces in chunks_by_doc.items()}
+    if not texts:
+        return [], {}
+
+    doc_ids = sorted(texts)
+    embeddings = engine.router.embed([texts[doc_id] for doc_id in doc_ids])
+    notes = [
+        EmbeddedNote(doc_id=doc_id, source=source_by_doc[doc_id], embedding=embedding)
+        for doc_id, embedding in zip(doc_ids, embeddings)
+    ]
+    return notes, texts
+
+
+@app.command("merge-proposals")
+def merge_proposals_cmd(
+    out: Path = typer.Option(None, help="Output directory (defaults to config merge_proposals_dir)."),
+    threshold: float = typer.Option(0.92, help="Cosine similarity threshold for near-duplicate clustering."),
+) -> None:
+    """Detect near-duplicate note clusters and write human-reviewable merge proposal docs.
+
+    Never merges or deletes anything: each cluster becomes one markdown file under the
+    output directory for a human to review (second_brain.merge_proposals) - same
+    detect-candidates-only contract as `predict-links` and near_dup.py.
+    """
+    from second_brain.merge_proposals import build_merge_proposals, write_merge_proposals
+    from second_brain.near_dup import cluster_near_duplicates
+
+    settings = get_settings()
+    engine = _engine()
+    notes, texts = _notes_from_store(engine)
+    clusters = cluster_near_duplicates(notes, threshold=threshold)
+    if not clusters:
+        typer.echo("No near-duplicate clusters found - nothing to propose.")
+        return
+
+    proposals = build_merge_proposals(clusters, texts)
+    out_dir = Path(out) if out else settings.merge_proposals_dir
+    paths = write_merge_proposals(proposals, out_dir)
+    typer.echo(f"Wrote {len(paths)} merge proposal(s) to {out_dir}")
+
+
 @app.command("add-note")
 def add_note_cmd(
     text: str = typer.Argument(..., help="The note text to remember (quote it)."),
