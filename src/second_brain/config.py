@@ -16,6 +16,7 @@ class SecondBrainSettings(BaseSettings):
     vault_dir: Path = Path("sample-vault")
     manifest_path: Path = Path("data/vault_manifest.json")
     graph_html_path: Path = Path("data/graph.html")
+    merge_proposals_dir: Path = Path("data/merge-proposals")
     related_top_k: int = 5
     # Local model the graph uses for triple extraction when no OLLAMA_MODEL / Gemini key is set.
     # qwen2.5:3b-instruct is the strongest small model that stays fast on a 4 GB GPU.

@@ -1,7 +1,7 @@
 # Second Brain++
 
 [![CI](https://github.com/syzayd/second-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/syzayd/second-brain/actions/workflows/ci.yml)
-![Tests](https://img.shields.io/badge/tests-50%20passed%20offline-brightgreen)
+![Tests](https://img.shields.io/badge/tests-75%20passed%20offline-brightgreen)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -23,6 +23,17 @@ vault-level workflows the core does not:
 - **Code graphs via Graphify** (optional) - build a code/repo knowledge graph with
   [Graphify](https://github.com/Graphify-Labs) and render it in the same offline viewer,
   optionally merged with your notes graph (`code-graph`).
+- **Link prediction** - rank note pairs that share many neighbors but aren't directly
+  linked yet, a common-neighbors baseline over the knowledge graph (`predict-links`).
+- **Merge-proposal generator** - cluster near-duplicate notes and write one
+  human-readable markdown proposal per cluster for you to review; it never merges or
+  deletes anything itself (`merge-proposals`).
+
+Under the hood, `near_dup.py` and `contradictions.py` also flag near-duplicate and
+possibly-contradictory note pairs for review (not yet wired to their own CLI commands);
+`link_predict.py` and `merge_proposals.py` above are the two PROJECT-GENESIS Tier 4
+analyzers built on top of them so far - both strictly detect-and-propose, never write to
+the graph or delete a note themselves.
 
 This is project #2 in a larger local-first AI ecosystem. It reuses the Personal LLM
 package instead of reimplementing retrieval or routing.
@@ -62,6 +73,10 @@ py -3.12 -m venv venv
 
 # Optional: a code graph of any repo via Graphify (pip install graphifyy first)
 & "venv\Scripts\python" -m second_brain.interfaces.cli code-graph . --merge-notes
+
+# Suggest missing links, and propose merges for near-duplicate notes (never auto-merges)
+& "venv\Scripts\python" -m second_brain.interfaces.cli predict-links
+& "venv\Scripts\python" -m second_brain.interfaces.cli merge-proposals --out data\merge-proposals
 ```
 
 Ingest and search reuse Personal LLM's local embeddings, so they work with no API key.
@@ -106,10 +121,10 @@ real terminal recording. Never fabricate. -->
 & "venv\Scripts\python" -m pytest tests/ -q
 ```
 
-50 tests. The core logic (vault, links, graphview, near-dup and contradiction
-detection) has no Personal LLM import - dependencies are injected - so the whole suite
-runs fully mocked, with no API key, network, or heavy model (CI runs it keyless on
-every push). Only the CLI touches the real core, and it imports it lazily.
+75 tests. The core logic (vault, links, graphview, near-dup and contradiction detection,
+link prediction, merge proposals) has no Personal LLM import - dependencies are injected -
+so the whole suite runs fully mocked, with no API key, network, or heavy model (CI runs it
+keyless on every push). Only the CLI touches the real core, and it imports it lazily.
 
 ## Architecture
 
@@ -117,6 +132,7 @@ every push). Only the CLI touches the real core, and it imports it lazily.
 CLI (thin, lazy-imports the core)
         |
    second_brain: vault (incremental ingest) | links (doc-level auto-linking) | graphview (offline HTML)
+                 near_dup / contradictions (candidate detection) | link_predict | merge_proposals
         |
    Personal LLM core: ingest_file | semantic_search | knowledge graph (store.all_nodes/all_edges)
 ```
