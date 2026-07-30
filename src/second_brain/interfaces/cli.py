@@ -186,6 +186,34 @@ def merge_proposals_cmd(
     typer.echo(f"Wrote {len(paths)} merge proposal(s) to {out_dir}")
 
 
+@app.command("idea-collisions")
+def idea_collisions_cmd(
+    out: Path = typer.Option(None, help="Output directory (defaults to config idea_collisions_dir)."),
+    max_similarity: float = typer.Option(0.25, help="Maximum cosine similarity to qualify as unrelated."),
+    top_k: int = typer.Option(20, help="Maximum number of candidate pairs to write."),
+) -> None:
+    """Pair topically unrelated notes as startup/project idea sparks for you to riff on.
+
+    Never creates or merges anything: each candidate pair becomes one markdown file under
+    the output directory for a human (or a later LLM step) to review
+    (second_brain.idea_collisions) - same detect-candidates-only contract as
+    `merge-proposals` and `predict-links`.
+    """
+    from second_brain.idea_collisions import find_idea_collisions, write_idea_collisions
+
+    settings = get_settings()
+    engine = _engine()
+    notes, texts = _notes_from_store(engine)
+    pairs = find_idea_collisions(notes, max_similarity=max_similarity, top_k=top_k)
+    if not pairs:
+        typer.echo("No idea-collision candidates found - vault may be too small or too homogeneous.")
+        return
+
+    out_dir = Path(out) if out else settings.idea_collisions_dir
+    paths = write_idea_collisions(pairs, texts, out_dir)
+    typer.echo(f"Wrote {len(paths)} idea-collision candidate(s) to {out_dir}")
+
+
 @app.command("add-note")
 def add_note_cmd(
     text: str = typer.Argument(..., help="The note text to remember (quote it)."),

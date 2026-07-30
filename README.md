@@ -1,7 +1,7 @@
 # Second Brain++
 
 [![CI](https://github.com/syzayd/second-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/syzayd/second-brain/actions/workflows/ci.yml)
-![Tests](https://img.shields.io/badge/tests-75%20passed%20offline-brightgreen)
+![Tests](https://img.shields.io/badge/tests-90%20passed%20offline-brightgreen)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -28,12 +28,16 @@ vault-level workflows the core does not:
 - **Merge-proposal generator** - cluster near-duplicate notes and write one
   human-readable markdown proposal per cluster for you to review; it never merges or
   deletes anything itself (`merge-proposals`).
+- **Idea-collision engine** - pair topically *unrelated* notes (low similarity, different
+  sources) as candidate sparks for a new project or startup idea, the mirror image of the
+  merge-proposal generator's near-duplicate bar; it never writes the idea itself, only the
+  candidate pairing for you (or a later LLM step) to riff on (`idea-collisions`).
 
 Under the hood, `near_dup.py` and `contradictions.py` also flag near-duplicate and
 possibly-contradictory note pairs for review (not yet wired to their own CLI commands);
-`link_predict.py` and `merge_proposals.py` above are the two PROJECT-GENESIS Tier 4
-analyzers built on top of them so far - both strictly detect-and-propose, never write to
-the graph or delete a note themselves.
+`link_predict.py`, `merge_proposals.py`, and `idea_collisions.py` above are the
+PROJECT-GENESIS Tier 4 analyzers built on top of them so far - all strictly
+detect-and-propose, never write to the graph or delete a note themselves.
 
 This is project #2 in a larger local-first AI ecosystem. It reuses the Personal LLM
 package instead of reimplementing retrieval or routing.
@@ -77,6 +81,9 @@ py -3.12 -m venv venv
 # Suggest missing links, and propose merges for near-duplicate notes (never auto-merges)
 & "venv\Scripts\python" -m second_brain.interfaces.cli predict-links
 & "venv\Scripts\python" -m second_brain.interfaces.cli merge-proposals --out data\merge-proposals
+
+# Pair unrelated notes as idea sparks (never creates anything itself)
+& "venv\Scripts\python" -m second_brain.interfaces.cli idea-collisions --out data\idea-collisions
 ```
 
 Ingest and search reuse Personal LLM's local embeddings, so they work with no API key.
