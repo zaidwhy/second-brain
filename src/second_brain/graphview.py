@@ -178,6 +178,10 @@ _HTML_TEMPLATE = """<!doctype html>
 <script>
 const DATA = __DATA__;
 const PALETTE = ["#58b4c9", "#e0a15a", "#a88be0", "#e07a9a", "#8bc06a", "#6a9de0"];
+// Matches CSS --accent (#e8b768). Canvas draw calls can't read a CSS custom property, so
+// this is the one JS-side source of truth for the accent color instead of retyping the
+// triple at each call site below.
+const ACCENT_RGB = "232, 183, 104";
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -265,7 +269,7 @@ function runGraph() {
     ctx.clearRect(0, 0, W, H);
     for (const l of links) {
       const active = focus && (l.s.id === focus.id || l.t.id === focus.id);
-      ctx.strokeStyle = active ? "rgba(232, 183, 104, 0.55)" : "rgba(198, 210, 230, 0.10)";
+      ctx.strokeStyle = active ? "rgba(" + ACCENT_RGB + ", 0.55)" : "rgba(198, 210, 230, 0.10)";
       ctx.lineWidth = active ? 1.6 : 1;
       ctx.beginPath(); ctx.moveTo(l.s.x, l.s.y); ctx.lineTo(l.t.x, l.t.y); ctx.stroke();
     }
@@ -275,7 +279,7 @@ function runGraph() {
       ctx.globalAlpha = a;
       ctx.beginPath(); ctx.fillStyle = colorFor(n.type); ctx.arc(n.x, n.y, r, 0, Math.PI * 2); ctx.fill();
       if (focus && n.id === focus.id) {
-        ctx.lineWidth = 2; ctx.strokeStyle = "#e8b768"; ctx.stroke();
+        ctx.lineWidth = 2; ctx.strokeStyle = "rgb(" + ACCENT_RGB + ")"; ctx.stroke();
       }
       const label = showAllLabels || (focus && a > 0.5);
       if (label) {
