@@ -63,3 +63,18 @@ def test_render_html_script_safe_names():
     html = render_html(nl)
     assert "</script><b>boom</b>" not in html
     assert "<\/script>" in html
+
+
+def test_accent_rgb_is_single_sourced():
+    """The canvas focus-ring and active-edge colors must derive from one ACCENT_RGB
+    constant matching CSS --accent (#e8b768), not two independently hardcoded literals
+    (see docs/DESIGN.md "Known inconsistencies" / "Polish fix in this pass")."""
+    html = render_html(to_nodelink([], []))
+    assert "--accent: #e8b768;" in html
+    assert 'const ACCENT_RGB = "232, 183, 104";' in html
+    # The raw RGB triple appears exactly once now: inside the ACCENT_RGB declaration
+    # itself. The two canvas draw calls reference the constant instead of retyping it.
+    assert html.count("232, 183, 104") == 1
+    # The bare hex form must no longer be hardcoded as a strokeStyle literal in the canvas
+    # script (it still appears in the CSS declaration and the ACCENT_RGB comment above it).
+    assert 'strokeStyle = "#e8b768"' not in html
