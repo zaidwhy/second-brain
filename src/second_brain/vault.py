@@ -6,6 +6,11 @@ only re-embeds what actually changed.
 
 This module has no Personal LLM import on purpose - the caller injects `ingest_fn`, which
 keeps the heavy dependencies (and the tests) out of the core logic.
+
+Per-file-type behavior is dispatched through the `IngestAdapter` interface in
+`adapters.py` (see docs/ADAPTERS.md). Suffixes with no matching adapter fall back to
+calling `ingest_fn` directly, so this refactor changes no output for any currently
+supported suffix.
 """
 
 from __future__ import annotations
@@ -15,6 +20,8 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
+
+from second_brain.adapters import DEFAULT_ADAPTERS, IngestAdapter, find_adapter
 
 SUPPORTED_SUFFIXES = {".md", ".markdown", ".txt", ".pdf", ".png", ".jpg", ".jpeg"}
 
@@ -71,8 +78,14 @@ def ingest_vault(
     ingest_fn: IngestFn,
     *,
     force: bool = False,
+    adapters: tuple[IngestAdapter, ...] = DEFAULT_ADAPTERS,
 ) -> VaultIngestReport:
     """Ingest changed files under `vault_dir`, skipping ones whose content is unchanged.
+
+    Each file is routed to the first adapter in `adapters` whose `handles(path)` is True
+    (see adapters.py / docs/ADAPTERS.md); that adapter's `ingest(path, ingest_fn)` performs
+    the actual ingestion. Suffixes with no matching adapter (e.g. .pdf/.png/.jpg today) fall
+    back to calling `ingest_fn(path)` directly, so behavior for those is unchanged.
 
     `ingest_fn(path)` performs the actual ingestion (wraps
     personal_llm.memory.ingest.ingest_file in real use; a stub in tests).
@@ -88,7 +101,11 @@ def ingest_vault(
             if not force and manifest.fingerprints.get(key) == fingerprint:
                 report.skipped.append(key)
                 continue
-            ingest_fn(path)
+            adapter = find_adapter(path, adapters)
+            if adapter is not None:
+                adapter.ingest(path, ingest_fn)
+            else:
+                ingest_fn(path)
             manifest.fingerprints[key] = fingerprint
             report.ingested.append(key)
     finally:
