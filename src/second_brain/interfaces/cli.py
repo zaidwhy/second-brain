@@ -100,6 +100,24 @@ def graph(out: Path = typer.Option(None, help="Output HTML path (defaults to con
     typer.echo(f"Wrote {len(nodelink.nodes)} nodes, {len(nodelink.links)} links to {out}")
 
 
+@app.command("search-graph")
+def search_graph_cmd(
+    query: str = typer.Option(None, "--query", "-q", help="Case-insensitive name substring to match."),
+    type: str = typer.Option(None, "--type", "-t", help="Exact node type to match (e.g. note, person)."),
+    limit: int = typer.Option(20, help="Maximum results to show."),
+) -> None:
+    """Search/filter the knowledge graph's nodes by name and/or type, ranked by degree."""
+    from second_brain.graph_search import search_nodes
+
+    engine = _engine()
+    results = search_nodes(engine.store.all_nodes(), engine.store.all_edges(), query=query, type=type)
+    if not results:
+        typer.echo("No matching nodes.")
+        return
+    for result in results[:limit]:
+        typer.echo(f"[deg {result.degree}] {result.node.name} ({result.node.type})")
+
+
 @app.command("predict-links")
 def predict_links_cmd(
     k: int = typer.Option(10, help="Number of predicted links to show."),

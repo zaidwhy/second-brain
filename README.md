@@ -25,6 +25,9 @@ vault-level workflows the core does not:
   optionally merged with your notes graph (`code-graph`).
 - **Link prediction** - rank note pairs that share many neighbors but aren't directly
   linked yet, a common-neighbors baseline over the knowledge graph (`predict-links`).
+- **Graph node search** - filter the knowledge graph's nodes by a name substring and/or
+  type, ranked by how connected each node is, for finding a node in a graph too large to
+  eyeball in the `graph` viewer (`search-graph`).
 - **Merge-proposal generator** - cluster near-duplicate notes and write one
   human-readable markdown proposal per cluster for you to review; it never merges or
   deletes anything itself (`merge-proposals`).
@@ -80,6 +83,9 @@ py -3.12 -m venv venv
 
 # Suggest missing links, and propose merges for near-duplicate notes (never auto-merges)
 & "venv\Scripts\python" -m second_brain.interfaces.cli predict-links
+
+# Find a node in a large graph by name and/or type
+& "venv\Scripts\python" -m second_brain.interfaces.cli search-graph --query dreamos --type note
 & "venv\Scripts\python" -m second_brain.interfaces.cli merge-proposals --out data\merge-proposals
 
 # Pair unrelated notes as idea sparks (never creates anything itself)
