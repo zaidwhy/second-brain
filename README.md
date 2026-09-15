@@ -1,12 +1,12 @@
 # Second Brain++
 
-[![CI](https://github.com/syzayd/second-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/syzayd/second-brain/actions/workflows/ci.yml)
+[![CI](https://github.com/zaidwhy/second-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/zaidwhy/second-brain/actions/workflows/ci.yml)
 ![Tests](https://img.shields.io/badge/tests-90%20passed%20offline-brightgreen)
 ![Python](https://img.shields.io/badge/python-3.12-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 **Your Mind. Expanded.** An AI knowledge layer built on top of the
-[Personal LLM](https://github.com/syzayd/personal-llm) core.
+[Personal LLM](https://github.com/zaidwhy/personal-llm) core.
 
 Personal LLM already gives us memory, RAG, and a knowledge graph. Second Brain++ adds the
 vault-level workflows the core does not:
@@ -50,8 +50,8 @@ package instead of reimplementing retrieval or routing.
 Clone this repo and the core side by side, then install both:
 
 ```powershell
-git clone https://github.com/syzayd/personal-llm
-git clone https://github.com/syzayd/second-brain
+git clone https://github.com/zaidwhy/personal-llm
+git clone https://github.com/zaidwhy/second-brain
 cd second-brain
 py -3.12 -m venv venv
 & "venv\Scripts\python" -m pip install -r requirements.txt
