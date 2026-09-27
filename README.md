@@ -125,8 +125,12 @@ A real recorded session: `second-brain graph --out data\graph.html` exports a fu
 offline, single-file force-graph of everything you ingested; the GIF above is that file
 being explored (hover, drag, zoom) - captured from a real run, as is everything here.
 
-<!-- TODO(zaid): also capture the CLI half (ingest the sample vault, run `related`) as a
-real terminal recording. Never fabricate. -->
+![CLI demo - ingest the sample vault, related notes, semantic search](docs/demo-cli.gif)
+
+The CLI half, recorded 2026-09-27 from a real run against `sample-vault/` in a clean data
+directory: `ingest-vault`, then `related` and `search`. The output is the programs' own;
+only the typing speed is rendered (`zaid-os/scripts/term_gif.py` runs each command and
+captures what it prints).
 
 ## Tests
 
