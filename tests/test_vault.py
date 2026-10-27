@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from second_brain.vault import (
     file_fingerprint,
     ingest_vault,
@@ -103,17 +105,13 @@ def test_ingest_failure_still_saves_progress(tmp_path):
         if path.name == "b.md":
             raise RuntimeError("embedder died")
 
-    try:
+    with pytest.raises(RuntimeError, match="embedder died"):
         ingest_vault(tmp_path / "vault", manifest, flaky)
-    except RuntimeError:
-        pass
     assert calls == ["a.md", "b.md"]
 
     calls.clear()
-    try:
+    with pytest.raises(RuntimeError, match="embedder died"):
         ingest_vault(tmp_path / "vault", manifest, flaky)
-    except RuntimeError:
-        pass
     assert calls == ["b.md"]  # a.md was remembered despite the crash
 
 
