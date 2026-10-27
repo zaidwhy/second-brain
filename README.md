@@ -1,3 +1,5 @@
+<img src=".github/plate.svg" alt="Second Brain: A vault that links itself, built on the personal-llm kernel. 110 tests; auto-linking on ingest; offline graph viewer. Core strip: 37 commits over 13 weeks, Jul 2026 to Sep 2026." width="100%">
+
 # Second Brain++
 
 [![CI](https://github.com/zaidwhy/second-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/zaidwhy/second-brain/actions/workflows/ci.yml)
@@ -166,3 +168,7 @@ templates are under `.github/ISSUE_TEMPLATE/`.
 ## License
 
 [MIT](LICENSE).
+
+---
+
+<sub>One plate from the survey at [github.com/zaidwhy](https://github.com/zaidwhy). The strip on the plate above is this repository's own commit history, one band per week.</sub>
