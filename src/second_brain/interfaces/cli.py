@@ -33,16 +33,21 @@ def ingest_vault_cmd(
     force: bool = typer.Option(False, "--force", help="Re-ingest every file, ignoring the manifest."),
 ) -> None:
     """Ingest all changed notes under a vault folder into the Personal LLM core."""
+    from personal_llm.config import get_settings as get_core_settings
     from personal_llm.memory.ingest import ingest_file
 
-    from second_brain.vault import ingest_vault
+    from second_brain.vault import ingest_vault, resolve_manifest_path
 
     settings = get_settings()
     vault_dir = vault or settings.vault_dir
+    core = get_core_settings()
+    # The old cwd-relative manifest only ever described the default store.
+    legacy = None if core.nexus_data_dir else Path(__file__).resolve().parents[3] / "data" / "vault_manifest.json"
+    manifest_path = resolve_manifest_path(settings.manifest_path, core.data_root, legacy=legacy)
     engine = _engine()
     report = ingest_vault(
         vault_dir,
-        settings.manifest_path,
+        manifest_path,
         lambda path: ingest_file(engine.store, engine.vectors, engine.router, path),
         force=force,
     )

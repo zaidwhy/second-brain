@@ -14,7 +14,8 @@ class SecondBrainSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="SECOND_BRAIN_", env_file=".env", extra="ignore")
 
     vault_dir: Path = Path("sample-vault")
-    manifest_path: Path = Path("data/vault_manifest.json")
+    # None = beside the vector store (personal-llm data root); see vault.resolve_manifest_path.
+    manifest_path: Path | None = None
     graph_html_path: Path = Path("data/graph.html")
     merge_proposals_dir: Path = Path("data/merge-proposals")
     idea_collisions_dir: Path = Path("data/idea-collisions")

@@ -8,6 +8,7 @@ from second_brain.vault import (
     file_fingerprint,
     ingest_vault,
     iter_vault_files,
+    resolve_manifest_path,
 )
 
 
@@ -114,3 +115,48 @@ def test_ingest_failure_still_saves_progress(tmp_path):
     except RuntimeError:
         pass
     assert calls == ["b.md"]  # a.md was remembered despite the crash
+
+
+def test_manifest_defaults_to_the_data_root_the_vectors_use(tmp_path):
+    root = tmp_path / "store"
+    path = resolve_manifest_path(None, root, legacy=tmp_path / "old" / "vault_manifest.json")
+    assert path == root / "vault_manifest.json"
+
+
+def test_an_explicit_manifest_path_wins(tmp_path):
+    chosen = tmp_path / "mine.json"
+    assert resolve_manifest_path(chosen, tmp_path / "store", legacy=tmp_path / "old.json") == chosen
+
+
+def test_legacy_manifest_is_copied_once_so_nothing_is_re_embedded(tmp_path):
+    legacy = tmp_path / "old" / "vault_manifest.json"
+    _write(legacy, '{"a.md": "abc"}')
+    path = resolve_manifest_path(None, tmp_path / "store", legacy=legacy)
+    assert path.read_text(encoding="utf-8") == '{"a.md": "abc"}'
+
+
+def test_legacy_manifest_never_overwrites_the_current_one(tmp_path):
+    legacy = tmp_path / "old" / "vault_manifest.json"
+    _write(legacy, '{"stale": "1"}')
+    current = tmp_path / "store" / "vault_manifest.json"
+    _write(current, '{"fresh": "2"}')
+    resolve_manifest_path(None, tmp_path / "store", legacy=legacy)
+    assert current.read_text(encoding="utf-8") == '{"fresh": "2"}'
+
+
+def test_a_new_store_with_an_old_manifest_elsewhere_still_ingests(tmp_path):
+    # The bug: the manifest sat in a cwd-relative data/ folder while vectors followed
+    # NEXUS_DATA_DIR, so a fresh store skipped every note and stayed empty.
+    vault = tmp_path / "vault"
+    _write(vault / "a.md", "one")
+    old_store_manifest = tmp_path / "old-store" / "vault_manifest.json"
+    ingest_vault(vault, old_store_manifest, lambda _p: None)
+    new_manifest = resolve_manifest_path(None, tmp_path / "new-store", legacy=tmp_path / "absent.json")
+    seen: list[Path] = []
+    report = ingest_vault(vault, new_manifest, seen.append)
+    assert len(report.ingested) == 1 and len(seen) == 1
+
+
+def test_no_legacy_means_no_copy_into_a_different_store(tmp_path):
+    path = resolve_manifest_path(None, tmp_path / "other-store", legacy=None)
+    assert not path.exists()

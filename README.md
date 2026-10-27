@@ -1,4 +1,4 @@
-<img src=".github/plate.svg" alt="Second Brain: A vault that links itself, built on the personal-llm kernel. 110 tests; auto-linking on ingest; offline graph viewer. Core strip: 37 commits over 13 weeks, Jul 2026 to Sep 2026." width="100%">
+<img src=".github/plate.svg" alt="Second Brain: A vault that links itself, built on the personal-llm kernel. 116 tests; auto-linking on ingest; offline graph viewer. Core strip: 37 commits over 13 weeks, Jul 2026 to Sep 2026." width="100%">
 
 # Second Brain++
 

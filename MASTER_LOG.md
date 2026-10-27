@@ -66,3 +66,10 @@ Append-only. Newest entries at the bottom. Read just the tail for recent context
   "40 tests" after near-dup + contradiction detectors grew the suite to 50 - corrected
   both.
 - Docs-only change; full suite still 50/50 green offline (verified, no regressions expected).
+
+## 2026-10-28 night - vault manifest follows the vector store
+
+- End-to-end probe: with `NEXUS_DATA_DIR` pointed at an empty store, `ingest-vault sample-vault` printed "Ingested 0, skipped 3" and left the store empty. The manifest (which files are already embedded) defaulted to the cwd-relative `data/vault_manifest.json`, while the vectors followed `NEXUS_DATA_DIR`; running from another folder had the opposite failure (a fresh manifest over a full store, so everything re-embedded).
+- Fix: `vault.resolve_manifest_path` puts the default manifest beside the vectors (`<data root>/vault_manifest.json`); an explicit `SECOND_BRAIN_MANIFEST_PATH` still wins. The old manifest is copied once into the default store only (it describes no other store), so nothing already ingested is re-embedded. A first version copied it into any store and the live rerun caught it; the `legacy=None` rule and its test came from that.
+- Verified: 6 tests written first; 116 passed. Live: a fresh `NEXUS_DATA_DIR` now attempts ingestion with an empty manifest; the default store got a byte-identical copy of the old manifest and skipped the 3 sample notes.
+- Not verified: an actual embedding run (this machine has no project venv; the global Python lacks sentence_transformers).

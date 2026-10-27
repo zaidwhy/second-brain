@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
@@ -43,6 +44,24 @@ def iter_vault_files(vault_dir: Path, suffixes: set[str] | None = None) -> list[
 def file_fingerprint(path: Path) -> str:
     """SHA-256 of file bytes - changes iff the content changes."""
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def resolve_manifest_path(configured: Path | None, data_root: Path, *, legacy: Path | None) -> Path:
+    """Where the ingest manifest lives: beside the vectors it describes.
+
+    The manifest records which files are already embedded, so it must follow the same
+    data root as the vector store. An explicit `configured` path wins. A manifest left at
+    the old cwd-relative `legacy` location is copied over once, so switching to this
+    default does not re-embed a vault that is already ingested. Pass `legacy=None` for any
+    store other than the default one: the old manifest describes only that store.
+    """
+    if configured is not None:
+        return Path(configured)
+    path = Path(data_root) / "vault_manifest.json"
+    if legacy is not None and not path.exists() and Path(legacy).exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(legacy, path)
+    return path
 
 
 @dataclass
